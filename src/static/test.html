@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+
+    <style>
+      body { font-family: Tahoma, Geneva, sans-serif; }
+    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- colyseus.js client -->
+    <script type="text/javascript" src="https://unpkg.com/colyseus.js@^0.14.0/dist/colyseus.js"></script>
+    <!-- jquery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </head>
+  <body>
+
+    <strong>room</strong><br>
+
+    <button type="button" class="btn btn-success mb-3" id="create-room">Create Room</button>
+    <div id="list-room" class="list-group"></div>
+
+    <!-- <div id="messages"></div> -->
+
+    <script>
+      var host = window.document.location.host.replace(/:.*/, '');
+
+      var client = new Colyseus.Client(location.protocol.replace("http", "ws") + "//" + host + (location.port ? ':'+location.port : ''));
+      client.joinOrCreate("test").then(room => {
+        console.log("joined");
+        room.onStateChange.once(function(state) {
+          room.send("get-rooms");
+        });
+
+        // new room state
+        room.onStateChange(function(state) {
+            // this signal is triggered on each patch
+        });
+
+        room.onMessage("update-list-room", function(listRoom) {
+          let allRooms = Object.keys(listRoom.chatRooms);
+          // console.log(Object.keys(listRoom.chatRooms));
+          document.getElementById("list-room").innerHTML = allRooms.map(function(room) {
+            return `<button type="button" onclick="joinRoom('${room}')" class="list-group-item list-group-item-action active">
+                ${room}
+              </button>`;
+          });
+
+          // let a = allRooms.map()
+        });
+
+        $("#create-room").bind("click", function (e) {
+          room.send("noti-create-room", makeid(8));
+        });
+      });
+
+      function makeid(length) {
+        var result           = '';
+        var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        var charactersLength = characters.length;
+        for ( var i = 0; i < length; i++ ) {
+          result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+      }
+
+      function joinRoom(room) {
+        console.log(room);
+
+        
+      }
+
+    </script>
+  </body>
+</html>
